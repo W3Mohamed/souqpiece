@@ -1,0 +1,1 @@
+<?php    require_once('../database.php');    $id = $_GET['id'];            $requete = $pdo->prepare('DELETE FROM recherche WHERE id_recherche=?');    $requete->execute([$id]);    header('location:../recherche.php');?>

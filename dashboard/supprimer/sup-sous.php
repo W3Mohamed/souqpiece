@@ -1,0 +1,1 @@
+<?php    require_once('../database.php');    $id = $_GET['id'];    $sql = $pdo->prepare('DELETE FROM sous_categorie WHERE id_sous_categorie = ?');    $sql->execute([$id]);    header('location:../sous-categorie.php');?>
