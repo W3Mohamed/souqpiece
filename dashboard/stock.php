@@ -189,27 +189,33 @@
                         $libelle = trim($sheet->getCell('B' . $rowIndex)->getCalculatedValue() ?? '');
                         $marque = trim($sheet->getCell('C' . $rowIndex)->getCalculatedValue() ?? '');
                         $quant = (int)($sheet->getCell('D' . $rowIndex)->getCalculatedValue() ?? 0);
-                        $prix = (float)($sheet->getCell('G' . $rowIndex)->getCalculatedValue() ?? 0);
+                       // $prix = (float)($sheet->getCell('G' . $rowIndex)->getCalculatedValue() ?? 0);
+                        $prix_initial = (float)$sheet->getCell('G' . $rowIndex)->getCalculatedValue();
+                        $prix = $prix_initial;
                         $stock = ($quant > 0) ? 1 : 0;
                         
-                        if($prix > 0 AND prix <= 2000){
+                        if($prix_initial > 0 AND $prix_initial <= 2000){
                             $prix *= 1.5;
                         }
-                        if($prix > 2000 AND prix <= 4000){
+                        if($prix_initial > 2000 AND $prix_initial <= 4000){
                             $prix *= 1.4;
-                        }if($prix > 4000 AND prix <= 6000){
+                        }
+                        if($prix_initial > 4000 AND $prix_initial <= 6000){
                             $prix *= 1.35;
                         }
-                        if($prix > 6000 AND prix <= 8000){
+                        if($prix_initial > 6000 AND $prix_initial <= 8000){
                             $prix *= 1.3;
-                        }if($prix > 8000 AND prix <= 15000){
+                        }
+                        if($prix_initial > 8000 AND $prix_initial <= 15000){
                             $prix *= 1.25;
-                        }if($prix > 15000 AND prix <= 30000){
+                        }
+                        if($prix_initial > 15000 AND $prix_initial <= 30000){
                             $prix *= 1.2;
                         }
-                        if($prix > 30000 AND prix <= 50000){
+                        if($prix_initial > 30000 AND $prix_initial <= 50000){
                             $prix *= 1.15;
-                        }if($prix > 50000 AND prix <= 60000){
+                        }
+                        if($prix_initial > 50000 AND $prix_initial <= 60000){
                             $prix *= 1.12;
                         }
                         if($prix > 60000){
