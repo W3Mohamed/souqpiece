@@ -1,3 +1,5 @@
 /vendor/
 /img/
 /dashboard/data/
+/dashboard/database.php
+/dashboard/error_log

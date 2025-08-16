@@ -196,53 +196,54 @@
                             $placeholders = str_repeat('?,', count($idProds) - 1) . '?';
                             $conditions[] = 'produit.id_produit IN (' . $placeholders . ')';
                             $params = array_merge($params, $idProds);
-                        } else {
-                            // Recherche dans le fichier JSON
-                            $jsonFile = 'dashboard/data/stock.json';
-                            if (file_exists($jsonFile)) {
-                                $jsonData = json_decode(file_get_contents($jsonFile), true);
-                                
-                                $filteredItems = array_filter($jsonData, function($item) use ($terms) {
-                                    // Vérifie que tous les termes sont présents soit dans la référence, la marque ou le libellé
-                                    foreach ($terms as $term) {
-                                        if (stripos($item['reference'], $term) === false && 
-                                            stripos($item['marque'], $term) === false &&
-                                            stripos($item['libelle'], $term) === false) {
-                                            return false;
-                                        }
-                                    }
-                                    return true;
-                                });
-                                
-                                $filteredItems = array_slice($filteredItems, $offset, $itemsPerPage);
-                                
-                                foreach ($filteredItems as $item) {
-                                    $ref = htmlspecialchars($item['reference']);
-                                    $marques = preg_split('/[\/\\\\]/', $item['marque']);
-                                    $marque = htmlspecialchars(trim($marques[0]));
-                                    $prix = htmlspecialchars($item['prix']);
-                                    $libelle = htmlspecialchars($item['libelle']);
-                                    echo '<div class="produit">';
-                                    echo $item['stock'] == 0 ? '<h3 class="stock">non disponible</h3>' : '';
-                                    echo '<a href="produit.php?id='.$ref.'&from_json=1">';
-                                    echo '<img src="img/produit/aucune.png" alt="'.$ref.'" loading="lazy">';
-                                    echo '<h2>'.$libelle.'</h2>';
-                                    echo '<h4>'.$marque.'</h4>';
-                                    echo '<h4 style="margin-bottom:10px;font-size:10px"></h4>';
-                                    echo '<h4>Pièce détachée</h4>';
-                                    echo '<h2 id="prix">'.$prix.' DA</h2>';
-                                    echo '<i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>';
-                                    echo '</a></div>';
-                                }
-                                
-                                if (empty($filteredItems)) {
-                                    $sqlRech = $pdo->prepare('INSERT INTO recherche(mot) VALUE(?)');
-                                    $sqlRech->execute([$searchTerm]);
-                                    echo "<p>Aucun produit trouvé pour votre recherche.</p>";
-                                }
-                                return;
-                            }
                         }
+                        // } else {
+                        //     // Recherche dans le fichier JSON
+                        //     $jsonFile = 'dashboard/data/stock.json';
+                        //     if (file_exists($jsonFile)) {
+                        //         $jsonData = json_decode(file_get_contents($jsonFile), true);
+                                
+                        //         $filteredItems = array_filter($jsonData, function($item) use ($terms) {
+                        //             // Vérifie que tous les termes sont présents soit dans la référence, la marque ou le libellé
+                        //             foreach ($terms as $term) {
+                        //                 if (stripos($item['reference'], $term) === false && 
+                        //                     stripos($item['marque'], $term) === false &&
+                        //                     stripos($item['libelle'], $term) === false) {
+                        //                     return false;
+                        //                 }
+                        //             }
+                        //             return true;
+                        //         });
+                                
+                        //         $filteredItems = array_slice($filteredItems, $offset, $itemsPerPage);
+                                
+                        //         foreach ($filteredItems as $item) {
+                        //             $ref = htmlspecialchars($item['reference']);
+                        //             $marques = preg_split('/[\/\\\\]/', $item['marque']);
+                        //             $marque = htmlspecialchars(trim($marques[0]));
+                        //             $prix = htmlspecialchars($item['prix']);
+                        //             $libelle = htmlspecialchars($item['libelle']);
+                        //             echo '<div class="produit">';
+                        //             echo $item['stock'] == 0 ? '<h3 class="stock">non disponible</h3>' : '';
+                        //             echo '<a href="produit.php?id='.$ref.'&from_json=1">';
+                        //             echo '<img src="img/produit/aucune.png" alt="'.$ref.'" loading="lazy">';
+                        //             echo '<h2>'.$libelle.'</h2>';
+                        //             echo '<h4>'.$marque.'</h4>';
+                        //             echo '<h4 style="margin-bottom:10px;font-size:10px"></h4>';
+                        //             echo '<h4>Pièce détachée</h4>';
+                        //             echo '<h2 id="prix">'.$prix.' DA</h2>';
+                        //             echo '<i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>';
+                        //             echo '</a></div>';
+                        //         }
+                                
+                        //         if (empty($filteredItems)) {
+                        //             $sqlRech = $pdo->prepare('INSERT INTO recherche(mot) VALUE(?)');
+                        //             $sqlRech->execute([$searchTerm]);
+                        //             echo "<p>Aucun produit trouvé pour votre recherche.</p>";
+                        //         }
+                        //         return;
+                        //     }
+                        // }
                     } else {
                         // Recherche normale (sans étoiles et sans espaces significatifs) - votre code original
                         $ref = $searchTerm;
@@ -260,50 +261,51 @@
                             $placeholders = str_repeat('?,', count($idProds) - 1) . '?';
                             $conditions[] = 'produit.id_produit IN (' . $placeholders . ')';
                             $params = array_merge($params, $idProds);
-                        } else {
-                            $jsonFile = 'dashboard/data/stock.json';
-                            if (file_exists($jsonFile)) {
-                                $jsonData = json_decode(file_get_contents($jsonFile), true);
-                                $searchTerm = trim($_GET['query']);
-                                
-                                // Filtrer les références correspondantes
-                                $filteredItems = array_filter($jsonData, function($item) use ($searchTerm) {
-                                    return stripos($item['reference'], $searchTerm) !== false || 
-                                           stripos($item['libelle'], $searchTerm) !== false;
-                                });
-                                
-                                // Limiter aux 12 premiers pour la pagination
-                                $filteredItems = array_slice($filteredItems, $offset, $itemsPerPage);
-                                
-                                // Générer les produits virtuels
-                                foreach ($filteredItems as $item) {
-                                    // Nettoyer la référence et la marque
-                                    $ref = htmlspecialchars($item['reference']);
-                                    $marques = preg_split('/[\/\\\\]/', $item['marque']); // Gère / et \/
-                                    $marque = htmlspecialchars(trim($marques[0]));
-                                    $prix = htmlspecialchars($item['prix']);
-                                    $libelle = htmlspecialchars($item['libelle']);
-                                    echo '<div class="produit">';
-                                    echo $item['stock'] == 0 ? '<h3 class="stock">non disponible</h3>' : '';
-                                    echo '<a href="produit.php?id='.$ref.'&from_json=1">';
-                                    echo '<img src="img/produit/aucune.png" alt="'.$ref.'" loading="lazy">';
-                                    echo '<h2>'.$libelle.'</h2>';
-                                    echo '<h4>'.$marque.'</h4>';
-                                    echo '<h4 style="margin-bottom:10px;font-size:10px"></h4>';
-                                    echo '<h4>Pièce détachée</h4>';
-                                    echo '<h2 id="prix">'.$prix.' DA</h2>';
-                                    echo '<i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>';
-                                    echo '</a></div>';
-                                }
-                                
-                                if (empty($filteredItems)) {
-                                    $sqlRech = $pdo->prepare('INSERT INTO recherche(mot) VALUE(?)');
-                                    $sqlRech->execute([$ref]);
-                                    echo "<p>Aucun produit trouvé pour votre recherche.</p>";
-                                }
-                                return;
-                            }
                         }
+                        // } else {
+                        //     $jsonFile = 'dashboard/data/stock.json';
+                        //     if (file_exists($jsonFile)) {
+                        //         $jsonData = json_decode(file_get_contents($jsonFile), true);
+                        //         $searchTerm = trim($_GET['query']);
+                                
+                        //         // Filtrer les références correspondantes
+                        //         $filteredItems = array_filter($jsonData, function($item) use ($searchTerm) {
+                        //             return stripos($item['reference'], $searchTerm) !== false || 
+                        //                    stripos($item['libelle'], $searchTerm) !== false;
+                        //         });
+                                
+                        //         // Limiter aux 12 premiers pour la pagination
+                        //         $filteredItems = array_slice($filteredItems, $offset, $itemsPerPage);
+                                
+                        //         // Générer les produits virtuels
+                        //         foreach ($filteredItems as $item) {
+                        //             // Nettoyer la référence et la marque
+                        //             $ref = htmlspecialchars($item['reference']);
+                        //             $marques = preg_split('/[\/\\\\]/', $item['marque']); // Gère / et \/
+                        //             $marque = htmlspecialchars(trim($marques[0]));
+                        //             $prix = htmlspecialchars($item['prix']);
+                        //             $libelle = htmlspecialchars($item['libelle']);
+                        //             echo '<div class="produit">';
+                        //             echo $item['stock'] == 0 ? '<h3 class="stock">non disponible</h3>' : '';
+                        //             echo '<a href="produit.php?id='.$ref.'&from_json=1">';
+                        //             echo '<img src="img/produit/aucune.png" alt="'.$ref.'" loading="lazy">';
+                        //             echo '<h2>'.$libelle.'</h2>';
+                        //             echo '<h4>'.$marque.'</h4>';
+                        //             echo '<h4 style="margin-bottom:10px;font-size:10px"></h4>';
+                        //             echo '<h4>Pièce détachée</h4>';
+                        //             echo '<h2 id="prix">'.$prix.' DA</h2>';
+                        //             echo '<i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>';
+                        //             echo '</a></div>';
+                        //         }
+                                
+                        //         if (empty($filteredItems)) {
+                        //             $sqlRech = $pdo->prepare('INSERT INTO recherche(mot) VALUE(?)');
+                        //             $sqlRech->execute([$ref]);
+                        //             echo "<p>Aucun produit trouvé pour votre recherche.</p>";
+                        //         }
+                        //         return;
+                        //     }
+                        // }
                     }
                 }
                 
@@ -352,7 +354,7 @@
                         <?php if( $produit['img1'] != NULL){ ?>
                             <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>" loading="lazy">
                         <?php }else{ ?>
-                            <img src="img/produit/aucune.png" alt="<?=$produit['libelle']?> loading="lazy">
+                            <img src="img/produit/aucune.png" alt="<?=$produit['libelle']?>" loading="lazy">
                         <?php } ?>
                         <h2><?=$produit['libelle']?></h2>
                         <h4><?=$marque?></h4>
