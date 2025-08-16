@@ -56,7 +56,7 @@
             <div class="item">
                 <div class="img-principale">
                     <?php
-                        if($produit['img'] == NULL){
+                        if($produit['img1'] == NULL){
                             $produit['img1'] = 'aucune.png';
                         }
                     ?>
