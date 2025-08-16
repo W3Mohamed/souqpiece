@@ -46,7 +46,7 @@
         $sqlDesc->execute([$id,$id_voiture]);
         $desc = $sqlDesc->fetch();
         
-     ?>  
+    ?>  
 
     <!--=====================================
             detail
@@ -60,13 +60,13 @@
                             $produit['img1'] = 'aucune.png';
                         }
                     ?>
-                    <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>" loading="lazy">
+                    <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>" loading="lazy" id="mainImage">
                 </div>
                 <div class="gellery">
                     <i class="fa-solid fa-chevron-left" id="leftBtn"></i>
                     <i class="fa-solid fa-chevron-right" id="rightBtn"></i>
                     <div class="second-img">
-                        <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>">
+                        <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>" class="active">
                         <?php for($i = 2; $i <= 10 ; $i++): ?>
                             <?php if(!empty($produit['img' .$i])): ?>
                                 <img src="img/produit/<?=$produit['img'. $i]?>" alt="<?=$produit['libelle']?>" loading="lazy">
@@ -75,47 +75,85 @@
                     </div>                
                 </div>
             </div>
+            
             <div class="item">
-                <h1><?=$produit['libelle']?> - <?=$produit['marquepiece']?></h1>
-                <?php if($produit['stock'] == 0): ?>
-                <h3 id="dispo">Non disponible</h3><?php endif; ?>
-                <h4><?=$aff['sous']?></h4>
-                <h5><?=$aff['modele']?></h5>
+                <div class="product-info">
+                    <h1><?=$produit['libelle']?> - <?=$produit['marquepiece']?></h1>
+                    
+                    <?php if($produit['stock'] == 0): ?>
+                        <div class="product-badge unavailable">
+                            <i class="fa-solid fa-times-circle"></i>
+                            Non disponible
+                        </div>
+                    <?php else: ?>
+                        <div class="product-badge">
+                            <i class="fa-solid fa-check-circle"></i>
+                            En stock
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="product-meta">
+                        <h4><i class="fa-solid fa-car"></i> <?=$aff['modele']?></h4>
+                        <h5><i class="fa-solid fa-cogs"></i> <?=$aff['sous']?></h5>
+                    </div>
 
-                <div class="rating">
-                    <i class="fa-solid fa-star"></i>
-                    <i class="fa-solid fa-star"></i>
-                    <i class="fa-solid fa-star"></i>
-                    <i class="fa-solid fa-star"></i>
+                    <div class="rating">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <span class="rating-text">(4.8/5)</span>
+                    </div>
+                    
+                    <h3 class="prix"><?=$produit['prix']?> DA</h3>
+                    
+                    <div class="product-description">
+                        <h3><i class="fa-solid fa-info-circle"></i> Information sur le produit :</h3>
+                        <p><?= !empty($desc['description']) ? $desc['description'] : 'Description détaillée du produit avec toutes les caractéristiques techniques et les informations importantes pour l\'acheteur.' ?></p>
+                    </div>
+
+                    <form method="POST" action="panier.php" class="product-form">
+                        <input type="hidden" name="produit" value="<?=htmlspecialchars($id)?>">
+                        <input type="hidden" name="id_voiture" value="<?=htmlspecialchars($id_voiture)?>">
+                        
+                        <div class="quantity-selector">
+                            <label class="quantity-label">Quantité :</label>
+                            <input type="number" name="quantite" value="1" min="1" class="quantity-input" <?= $produit['stock'] == 0 ? 'disabled' : '' ?>>
+                        </div>
+                        
+                        <div class="button-group">
+                            <input type="submit" name="add_cart" value="Ajouter au panier" class="btn btn-cart" <?= $produit['stock'] == 0 ? 'disabled' : '' ?>>
+                            <input type="submit" name="acheter" value="Acheter maintenant" class="btn btn-buy" <?= $produit['stock'] == 0 ? 'disabled' : '' ?>>
+                        </div>
+                    </form>
                 </div>
-                <h3 class="prix"><?=$produit['prix']?> DA</h3>
-                <h3>Information sur le produit :</h3>
-                <p><?=$desc['description']?></p>
-
-                 <form method="POST" action="panier.php">
-                    <!-- Pour les produits de la BDD, on garde l'ID normal -->
-                    <input type="hidden" name="produit" value="<?=htmlspecialchars($id)?>">
-                    <input type="hidden" name="id_voiture" value="<?=htmlspecialchars($id_voiture)?>">
-                
-                    <input type="number" name="quantite" value="1" min="1" <?= $produit['stock'] == 0 ? 'disabled' : '' ?>>
-                    <input type="submit" name="add_cart" value="Ajouter au panier" <?= $produit['stock'] == 0 ? 'disabled' : '' ?>>
-                    <input type="submit" name="acheter" value="Acheter" id="acheter" <?= $produit['stock'] == 0 ? 'disabled' : '' ?>>
-                </form>
-
-                <?php if(isset($_GET['added'])): ?>
-                    <script>
-                        swal({
-                            title: "Insertion avec succes!",
-                            text: "Le produit <?=$produit['libelle']?> a ete bien ajoute au panier!",
-                            icon: "success",
-                        });
-                    </script>
-                <?php endif; ?>
             </div>
         </div>
     </div>
 
-    <!--=====================================
+    <!-- Section produits similaires -->
+    <?php
+        $id_sous_categorie = $produit['id_sous_categorie'];
+        $sqlSimilaires = $pdo->prepare('
+            SELECT p.*
+            FROM produit AS p
+            JOIN pvd AS pv ON p.id_produit = pv.id_produit
+            WHERE pv.id_voiture = :id_voiture
+                AND p.id_sous_categorie = :id_sous_categorie
+                AND p.id_produit != :id_produit
+            LIMIT 10
+        ');
+        $sqlSimilaires->execute([
+            ':id_voiture' => $id_voiture,
+            ':id_sous_categorie' => $id_sous_categorie,
+            ':id_produit' => $id,
+        ]);
+        
+        $produitsSimilaires = $sqlSimilaires->fetchAll(PDO::FETCH_ASSOC);
+    ?>
+    
+      <!--=====================================
             similaires
     ==========================================--> 
     <?php
@@ -141,32 +179,27 @@
         <h3>Des produits similaires</h3>
         <section class="splide splideSem" aria-label="Splide Basic HTML Example">
             <div class="splide__track">
-                    <ul class="splide__list">
-                        <?php foreach($produitsSimilaires as $produitsSimilaire): ?>
-                        <li class="splide__slide">
-                            <div class="produit" style="width:100%">
-                                <?php if($produitsSimilaire['stock'] == 0): ?>
-                                <h3 class="stock">non disponible</h3><?php endif; ?>
-                                <a href="produit.php?id=<?=$produitsSimilaire['id_produit']?>&id_voiture=<?=$id_voiture?>">
-                                    <img src="img/produit/<?= $produitsSimilaire['img1']?>" loading="lazy" alt="$produitsSimilaire['libelle']?>">
-                                    <h2><?= $produitsSimilaire['libelle']?></h2>
-                                    <h4><?= $aff['modele']?></h4>
-                                    <h4><?=$aff['sous']?></h4>
-                                    <h2 id="prix"><?=$produitsSimilaire['prix']?> DA</h2>
-                                    <i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>
-                                </a>
-                            </div>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
+                <ul class="splide__list">
+                    <?php foreach($produitsSimilaires as $produitsSimilaire): ?>
+                    <li class="splide__slide">
+                        <div class="produit" style="width:100%">
+                            <?php if($produitsSimilaire['stock'] == 0): ?>
+                            <h3 class="stock">non disponible</h3><?php endif; ?>
+                            <a href="produit.php?id=<?=$produitsSimilaire['id_produit']?>&id_voiture=<?=$id_voiture?>">
+                                <img src="img/produit/<?= $produitsSimilaire['img1']?>" loading="lazy" alt="$produitsSimilaire['libelle']?>">
+                                <h2><?= $produitsSimilaire['libelle']?></h2>
+                                <h4><?= $aff['modele']?></h4>
+                                <h4><?=$aff['sous']?></h4>
+                                <h2 id="prix"><?=$produitsSimilaire['prix']?> DA</h2>
+                                <i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>
+                            </a>
+                        </div>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         </section>
     </div>
-
-    <!--=========================================================
-                        footer
-    ========================================================-->
-    <?php include('partie/footer.php') ?>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -190,5 +223,103 @@
             splide.mount();
         });
     </script>    
+
+    <?php if(isset($_GET['added'])): ?>
+        <script>
+            swal({
+                title: "Insertion avec succès!",
+                text: "Le produit <?=$produit['libelle']?> a été bien ajouté au panier!",
+                icon: "success",
+            });
+        </script>
+    <?php endif; ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion de la galerie d'images
+            const mainImage = document.getElementById('mainImage');
+            const thumbnails = document.querySelectorAll('.second-img img');
+            const leftBtn = document.getElementById('leftBtn');
+            const rightBtn = document.getElementById('rightBtn');
+            const thumbnailContainer = document.querySelector('.second-img');
+            
+            let currentIndex = 0;
+            let images = [];
+            
+            // Collecter toutes les images disponibles
+            thumbnails.forEach((thumbnail, index) => {
+                images.push(thumbnail.src);
+                
+                thumbnail.addEventListener('click', function() {
+                    currentIndex = index;
+                    updateMainImage();
+                    updateActiveThumbnail();
+                });
+            });
+            
+            // Navigation avec les flèches seulement si il y a plus d'une image
+            if(images.length > 1) {
+                leftBtn.addEventListener('click', function() {
+                    currentIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+                    updateMainImage();
+                    updateActiveThumbnail();
+                    scrollToActiveThumbnail();
+                });
+                
+                rightBtn.addEventListener('click', function() {
+                    currentIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+                    updateMainImage();
+                    updateActiveThumbnail();
+                    scrollToActiveThumbnail();
+                });
+            } else {
+                // Cacher les boutons si une seule image
+                leftBtn.style.display = 'none';
+                rightBtn.style.display = 'none';
+            }
+            
+            function updateMainImage() {
+                if(images[currentIndex]) {
+                    mainImage.src = images[currentIndex];
+                }
+            }
+            
+            function updateActiveThumbnail() {
+                thumbnails.forEach((thumb, index) => {
+                    thumb.classList.toggle('active', index === currentIndex);
+                });
+            }
+            
+            function scrollToActiveThumbnail() {
+                if(thumbnails[currentIndex]) {
+                    thumbnails[currentIndex].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest',
+                        inline: 'center'
+                    });
+                }
+            }
+            
+            // Animation des cartes produits au scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.produit').forEach(produit => {
+                observer.observe(produit);
+            });
+        });
+    </script>
+
+    <?php include('partie/footer.php') ?>  
 </body>
 </html>
