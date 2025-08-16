@@ -1511,54 +1511,8 @@ footer .copy{
             background-clip: text;
         }
 
-        .produit {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            border: 1px solid #e5e7eb;
-            position: relative;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .produit:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .produit img {
-            width: 100%;
-            height: 220px;
-            object-fit: contain;
-            object-position: center;
-            background: #f8f9fa;
-        }
-
         .produit-content {
             padding: 20px;
-        }
-
-        .produit h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #1a1a1a;
-        }
-
-        .produit h4 {
-            color: #6b7280;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-
-        .produit .prix-similaire {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--color);
-            margin-top: 15px;
         }
 
         .stock-badge {
