@@ -182,7 +182,7 @@
                 <ul class="splide__list">
                     <?php foreach($produitsSimilaires as $produitsSimilaire): ?>
                     <li class="splide__slide">
-                        <div class="produit" style="width:100%">
+                        <!-- <div class="produit" style="width:100%">
                             <?php if($produitsSimilaire['stock'] == 0): ?>
                             <h3 class="stock">non disponible</h3><?php endif; ?>
                             <a href="produit.php?id=<?=$produitsSimilaire['id_produit']?>&id_voiture=<?=$id_voiture?>">
@@ -192,6 +192,32 @@
                                 <h4><?=$aff['sous']?></h4>
                                 <h2 id="prix"><?=$produitsSimilaire['prix']?> DA</h2>
                                 <i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>
+                            </a>
+                        </div> -->
+
+                        <div class="product-card <?= $produitsSimilaire['stock'] == 0 ? 'out-of-stock' : '' ?>">
+                            <a href="produit.php?id=<?=$produitsSimilaire['id_produit']?>&id_voiture=<?=$id_voiture?>" class="product-link">
+                                <?php if($produitsSimilaire['stock'] == 0): ?>
+                                <div class="stock-badge">Épuisé</div>
+                                <?php endif; ?>
+                                
+                                <div class="product-image-container">
+                                    <img src="img/produit/<?=$produitsSimilaire['img1']?>" alt="<?=$produitsSimilaire['libelle']?>" loading="lazy" class="product-image">
+                                </div>
+                                
+                                <div class="product-info">
+                                    <h3 class="product-title" style="font-size:16px"><?=$produitsSimilaire['libelle']?></h3>
+                                    <div class="product-meta">
+                                        <span class="product-brand"><?=$aff['sous']?></span>
+                                        <span class="product-model"><?=$aff['modele']?></span>
+                                    </div>
+                                    <div class="product-footer">
+                                        <span class="product-price"><?=number_format($produitsSimilaire['prix'], 0, ',', ' ')?> DA</span>
+                                        <button class="add-to-cart">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </a>
                         </div>
                     </li>
