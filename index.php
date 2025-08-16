@@ -78,93 +78,81 @@
     <!--============================================================
                     brand
     =============================================================-->
-    <div class="brand" id="brand">
-        <div class="titre"><h1>Quelle est la <span>marque</span> de votre voiture</h1></div>
-    <!--    <div class="gallery-wrap">
-            <i class="fa-solid fa-chevron-left backBtn" id="backBtn"></i>
-            <i class="fa-solid fa-chevron-right nextBtn" id="nextBtn"></i>
-            <div class="brand-img">
-                <?php
-                    $sql = 'SELECT * FROM marque';
-                    $query = $pdo->query($sql);
-                    $brands = $query->fetchAll();
-                    foreach($brands as $brand){
-                ?>
-                <a href="voiture.php?id=<?=$brand['id_marque']?>"><img src="img/logo/<?=$brand['logo']?>" alt="<?=$brand['libelle']?>"></a>
-                <?php } ?>
-            </div>
-        </div>-->
-        <section class="splide splide2" aria-label="Splide Basic HTML Example">
-            <div class="splide__track">
-                    <ul class="splide__list">
-                        <?php
-                            $sql = 'SELECT * FROM marque';
-                            $query = $pdo->query($sql);
-                            $brands = $query->fetchAll();
-                            foreach($brands as $brand){
-                        ?>
-                        <li class="splide__slide">
-                            <a href="voiture.php?id=<?=$brand['id_marque']?>"><img src="img/logo/<?=$brand['logo']?>" loading="lazy"></a>
-                        </li>
-
-                        <?php } ?>
-                    </ul>
-            </div>
-        </section>
-
-
-    </div>
-    <!--============================================================
-                    Categorie
-    =============================================================-->
-    <div class="section-categorie" id="section-categories">
-        <div class="titre"><h1>Découvré nos <span>categorie</span></h1></div>
-        <section class="splide splide1" aria-label="Splide Basic HTML Example">
-            <div class="splide__track">
-                    <ul class="splide__list">
-                        <?php
-                            $sqlStates = $pdo->prepare('SELECT * FROM categorie');
-                            $sqlStates->execute();
-                            $categories = $sqlStates->fetchAll(PDO::FETCH_ASSOC);
-                            foreach($categories as $categorie){
-                        ?>
-                        <li class="splide__slide">
-                            <a href="product.php?id_categorie=<?=$categorie['id_categorie']?>">
-                            <div class="categorie">
-                                <img src="img/categories/<?= $categorie['img']?>" alt="<?=$categorie['libelle']?>" loading="lazy">
-                                <h3><?= $categorie['libelle']?></h3>
-                                <h4><?= $categorie['arabe']?></h4>
-                                <!--    <a href="#">Voir plus</a> -->
-                            </div>
-                            </a>
-                        </li>
-
-                        <?php } ?>
-                    </ul>
-            </div>
-        </section>
-    </div>
-    <!--============================================================
-                  Produit
-    =============================================================-->
-    <div class="section-produit" id="section-produits">
-        <div class="text">
-            <h2>Decouvré nos produit</h2>
+    <section class="brand-section" id="brand">
+        <div class="section-header">
+            <h2 class="section-title">Quelle est la <span>marque</span> de votre voiture ?</h2>
+            <p class="section-subtitle">Trouvez les pièces adaptées à votre véhicule</p>
         </div>
+
+        <div class="brand-carousel">
+            <?php
+            $sql = 'SELECT * FROM marque';
+            $query = $pdo->query($sql);
+            $brands = $query->fetchAll();
+            foreach($brands as $brand):
+            ?>
+            <a href="voiture.php?id=<?=$brand['id_marque']?>" class="brand-card">
+                <div class="brand-logo-container">
+                    <img src="img/logo/<?=$brand['logo']?>" alt="<?=$brand['libelle']?>" loading="lazy" class="brand-logo">
+                </div>
+                <span class="brand-name"><?=$brand['libelle']?></span>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- Section Catégories -->
+    <section class="category-section" id="section-categories">
+        <div class="section-header">
+            <h2 class="section-title">Découvrez nos <span>catégories</span></h2>
+            <p class="section-subtitle">Toutes les pièces pour votre véhicule</p>
+        </div>
+
+        <div class="category-grid">
+            <?php
+            $sqlStates = $pdo->prepare('SELECT * FROM categorie');
+            $sqlStates->execute();
+            $categories = $sqlStates->fetchAll(PDO::FETCH_ASSOC);
+            foreach($categories as $categorie):
+            ?>
+            <a href="product.php?id_categorie=<?=$categorie['id_categorie']?>" class="category-card">
+                <div class="category-image-container">
+                    <img src="img/categories/<?=$categorie['img']?>" alt="<?=$categorie['libelle']?>" loading="lazy" class="category-image">
+                    <div class="category-overlay"></div>
+                </div>
+                <div class="category-info">
+                    <h3 class="category-title"><?=$categorie['libelle']?></h3>
+                    <p class="category-title-ar"><?=$categorie['arabe']?></p>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- Section Produits -->
+    <section class="products-section" id="section-produits">
+        <div class="section-header">
+            <h2 class="section-title">Découvrez nos <span>produits</span></h2>
+            <p class="section-subtitle">Les pièces les plus demandées</p>
+        </div>
+
         <?php
-            foreach($categories as $categorie){
-                $sqlProduit = $pdo->prepare('SELECT * FROM produit WHERE id_categorie=? AND trie > 0 ORDER BY trie LIMIT 6');
-                $sqlProduit->execute([$categorie['id_categorie']]);
-                $produits = $sqlProduit->fetchAll(PDO::FETCH_ASSOC);
-                if(!empty($produits)){
+        foreach($categories as $categorie){
+            $sqlProduit = $pdo->prepare('SELECT * FROM produit WHERE id_categorie=? AND trie > 0 ORDER BY trie LIMIT 8');
+            $sqlProduit->execute([$categorie['id_categorie']]);
+            $produits = $sqlProduit->fetchAll(PDO::FETCH_ASSOC);
+            
+            if(!empty($produits)):
         ?>
-        <div class="produit-container">
-            <h3><?=$categorie['libelle']?></h3>
-            <h3 class="categorie-ar"><?= $categorie['arabe']?></h3>
-            <div class="produits">
-            <?php    
+        <div class="product-category">
+            <div class="category-header">
+                <h3 class="category-name"><?=$categorie['libelle']?></h3>
+                <h3 class="category-name-ar"><?=$categorie['arabe']?></h3>
+            </div>
+            
+            <div class="product-grid">
+                <?php    
                 foreach($produits as $produit){  
-                    
                     $sqlVoit = $pdo->prepare('SELECT id_voiture FROM pvd WHERE id_produit=?');
                     $sqlVoit->execute([$produit['id_produit']]);
                     $id_voiture = $sqlVoit->fetchColumn();
@@ -176,32 +164,84 @@
                     $sqlMarque = $pdo->prepare('SELECT modele FROM voiture WHERE id_voiture=?');
                     $sqlMarque->execute([$id_voiture]);
                     $modele = $sqlMarque->fetchColumn(); 
-                    
-                    $sqlCate = $pdo->prepare('SELECT libelle FROM categorie WHERE id_categorie=?');
-                    $sqlCate->execute([$produit['id_categorie']]);
-                    $categorie = $sqlCate->fetchColumn();
-            ?>
-                <div class="produit">
-                    <?php
-                        if($produit['stock'] == 0){
-                    ?>
-                    <h3 class="stock">non disponible</h3><?php } ?>
-                    <a href="produit.php?id=<?=$produit['id_produit']?>&id_voiture=<?=$id_voiture?>">
-                        <img src="img/produit/<?= $produit['img1']?>" alt="<?=$produit['libelle']?> loading="lazy"">
-                        <h2><?= $produit['libelle']?></h2>
-                        <h4><?= $marque?></h4>
-                        <h4 style="margin-bottom:10px;font-size:10px"><?= $modele?></h4>
-                        <h4><?=$categorie?></h4>
-                        <h2 id="prix"><?=$produit['prix']?> DA</h2>
-                        <i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>
+                ?>
+                <div class="product-card <?= $produit['stock'] == 0 ? 'out-of-stock' : '' ?>">
+                    <a href="produit.php?id=<?=$produit['id_produit']?>&id_voiture=<?=$id_voiture?>" class="product-link">
+                        <?php if($produit['stock'] == 0): ?>
+                        <div class="stock-badge">Épuisé</div>
+                        <?php endif; ?>
+                        
+                        <div class="product-image-container">
+                            <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>" loading="lazy" class="product-image">
+                        </div>
+                        
+                        <div class="product-info">
+                            <h3 class="product-title"><?=$produit['libelle']?></h3>
+                            <div class="product-meta">
+                                <span class="product-brand"><?=$marque?></span>
+                                <span class="product-model"><?=$modele?></span>
+                            </div>
+                            <div class="product-footer">
+                                <span class="product-price"><?=number_format($produit['prix'], 0, ',', ' ')?> DA</span>
+                                <button class="add-to-cart">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                            </div>
+                        </div>
                     </a>
                 </div>
                 <?php } ?>
             </div>
         </div>
-        <?php } 
-        } ?>
-    </div>
+        <?php 
+            endif;
+        } 
+        ?>
+    </section>
+    
+    <script>
+        // Script pour le carousel personnalisé (optionnel)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation au scroll
+            const sections = document.querySelectorAll('section');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            sections.forEach(section => {
+                section.style.opacity = 0;
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'all 0.6s ease-out';
+                observer.observe(section);
+            });
+            
+            // Bouton ajouter au panier
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productCard = this.closest('.product-card');
+                    if(productCard.classList.contains('out-of-stock')) return;
+                    
+                    // Animation d'ajout au panier
+                    this.innerHTML = '<i class="fas fa-check"></i>';
+                    this.style.background = '#28a745';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+                        this.style.background = '#e12929';
+                    }, 1000);
+                    
+                    // Ici vous pourriez ajouter une requête AJAX pour ajouter au panier
+                });
+            });
+        });
+    </script>
     <!--============================================================
                   Boutique
     =============================================================-->
