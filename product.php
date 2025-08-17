@@ -132,7 +132,7 @@
                 </form>
             </div>
         <!--===============tout les produit===============================-->
-        <div class="produits">
+        <div class="product-grid">
             <?php
                 $itemsPerPage = 12; // Nombre de produits par page
                 $page = isset($_GET['page']) ? max((int)$_GET['page'], 1) : 1; // Page actuelle
