@@ -345,23 +345,29 @@
                     $sqlCate->execute([$produit['id_categorie']]);
                     $categorie = $sqlCate->fetchColumn();
                 ?>
-                <div class="produit">
-                    <?php
-                        if($produit['stock'] == 0){
-                    ?>
-                    <h3 class="stock">non disponible</h3><?php } ?>
-                    <a href="produit.php?id=<?=$produit['id_produit']?>&id_voiture=<?=$produit['voiture']?>">
-                        <?php if( $produit['img1'] != NULL){ ?>
-                            <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>" loading="lazy">
-                        <?php }else{ ?>
-                            <img src="img/produit/aucune.png" alt="<?=$produit['libelle']?>" loading="lazy">
-                        <?php } ?>
-                        <h2><?=$produit['libelle']?></h2>
-                        <h4><?=$marque?></h4>
-                        <h4 style="margin-bottom:10px;font-size:10px"><?= $modele?></h4>
-                        <h4><?=$categorie?></h4>
-                        <h2 id="prix"><?=$produit['prix']?> DA</h2>
-                        <i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>
+                <div class="product-card <?= $produit['stock'] == 0 ? 'out-of-stock' : '' ?>">
+                    <a href="produit.php?id=<?=$produit['id_produit']?>&id_voiture=<?=$produit['voiture']?>" class="product-link">
+                        <?php if($produit['stock'] == 0): ?>
+                        <div class="stock-badge">Épuisé</div>
+                        <?php endif; ?>
+                        
+                        <div class="product-image-container">
+                            <img src="img/produit/<?=$produit['img1']?>" alt="<?=$produit['libelle']?>" loading="lazy" class="product-image">
+                        </div>
+                        
+                        <div class="product-info">
+                            <h3 class="product-title"><?=$produit['libelle']?></h3>
+                            <div class="product-meta">
+                                <span class="product-brand"><?=$marque?></span>
+                                <span class="product-model"><?=$modele?></span>
+                            </div>
+                            <div class="product-footer">
+                                <span class="product-price"><?=number_format($produit['prix'], 0, ',', ' ')?> DA</span>
+                                <button class="add-to-cart">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                            </div>
+                        </div>
                     </a>
                 </div>
                 <?php } 

@@ -860,6 +860,23 @@ body{
 }
 
 /* Section Produits */
+.produits{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+@media screen and (max-width:660px) {
+    .produits{
+        margin-top: 40px;
+    }
+}
+@media screen and (max-width:300px) {
+    .produits{
+        justify-content: center;
+    }
+} 
 .products-section {
     padding: 60px 0;
     background-color: #f9f9f9;
