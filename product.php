@@ -189,61 +189,25 @@
                         $sqlDesc = $pdo->prepare('SELECT DISTINCT pvd.id_produit FROM pvd WHERE ' . implode(' AND ', $descConditions));
                         $sqlDesc->execute($descParams);
                         $idProdsDesc = $sqlDesc->fetchAll(PDO::FETCH_COLUMN);
+
+                        // Recherche par libellé
+                        $libelleConditions = [];
+                        $libelleParams = [];
+                        foreach ($terms as $term) {
+                            $libelleConditions[] = 'libelle LIKE ?';
+                            $libelleParams[] = '%' . $term . '%';
+                        }
+                        $sqlLibbelle = $pdo->prepare('SELECT id_produit FROM produit WHERE ' . implode(' AND ', $libelleConditions));
+                        $sqlLibbelle->execute($libelleParams);
+                        $idProdsLibbelle = $sqlLibbelle->fetchAll(PDO::FETCH_COLUMN);
                         
-                        $idProds = array_unique(array_merge($idProdsRef, $idProdsDesc));
+                        $idProds = array_unique(array_merge($idProdsRef, $idProdsDesc, $idProdsLibbelle));
                         
                         if (!empty($idProds)) {
                             $placeholders = str_repeat('?,', count($idProds) - 1) . '?';
                             $conditions[] = 'produit.id_produit IN (' . $placeholders . ')';
                             $params = array_merge($params, $idProds);
                         }
-                        // } else {
-                        //     // Recherche dans le fichier JSON
-                        //     $jsonFile = 'dashboard/data/stock.json';
-                        //     if (file_exists($jsonFile)) {
-                        //         $jsonData = json_decode(file_get_contents($jsonFile), true);
-                                
-                        //         $filteredItems = array_filter($jsonData, function($item) use ($terms) {
-                        //             // Vérifie que tous les termes sont présents soit dans la référence, la marque ou le libellé
-                        //             foreach ($terms as $term) {
-                        //                 if (stripos($item['reference'], $term) === false && 
-                        //                     stripos($item['marque'], $term) === false &&
-                        //                     stripos($item['libelle'], $term) === false) {
-                        //                     return false;
-                        //                 }
-                        //             }
-                        //             return true;
-                        //         });
-                                
-                        //         $filteredItems = array_slice($filteredItems, $offset, $itemsPerPage);
-                                
-                        //         foreach ($filteredItems as $item) {
-                        //             $ref = htmlspecialchars($item['reference']);
-                        //             $marques = preg_split('/[\/\\\\]/', $item['marque']);
-                        //             $marque = htmlspecialchars(trim($marques[0]));
-                        //             $prix = htmlspecialchars($item['prix']);
-                        //             $libelle = htmlspecialchars($item['libelle']);
-                        //             echo '<div class="produit">';
-                        //             echo $item['stock'] == 0 ? '<h3 class="stock">non disponible</h3>' : '';
-                        //             echo '<a href="produit.php?id='.$ref.'&from_json=1">';
-                        //             echo '<img src="img/produit/aucune.png" alt="'.$ref.'" loading="lazy">';
-                        //             echo '<h2>'.$libelle.'</h2>';
-                        //             echo '<h4>'.$marque.'</h4>';
-                        //             echo '<h4 style="margin-bottom:10px;font-size:10px"></h4>';
-                        //             echo '<h4>Pièce détachée</h4>';
-                        //             echo '<h2 id="prix">'.$prix.' DA</h2>';
-                        //             echo '<i class="fa-solid fa-cart-shopping" id="ajouter-panier"></i>';
-                        //             echo '</a></div>';
-                        //         }
-                                
-                        //         if (empty($filteredItems)) {
-                        //             $sqlRech = $pdo->prepare('INSERT INTO recherche(mot) VALUE(?)');
-                        //             $sqlRech->execute([$searchTerm]);
-                        //             echo "<p>Aucun produit trouvé pour votre recherche.</p>";
-                        //         }
-                        //         return;
-                        //     }
-                        // }
                     } else {
                         // Recherche normale (sans étoiles et sans espaces significatifs) - votre code original
                         $ref = $searchTerm;
@@ -254,8 +218,12 @@
                         $sqlDesc = $pdo->prepare('SELECT DISTINCT pvd.id_produit FROM pvd WHERE description LIKE ?');
                         $sqlDesc->execute(['%' . $ref . '%']);
                         $idProdsDesc = $sqlDesc->fetchAll(PDO::FETCH_COLUMN);
+
+                        $sqlLibbelle = $pdo->prepare('SELECT id_produit FROM produit WHERE libelle LIKE ?');
+                        $sqlLibbelle->execute(['%' . $ref . '%']);
+                        $idProdsLibbelle = $sqlLibbelle->fetchAll(PDO::FETCH_COLUMN);
                         
-                        $idProds = array_unique(array_merge($idProdsRef, $idProdsDesc));
+                        $idProds = array_unique(array_merge($idProdsRef, $idProdsDesc, $idProdsLibbelle));
                         
                         if (!empty($idProds)) {
                             $placeholders = str_repeat('?,', count($idProds) - 1) . '?';
@@ -344,6 +312,11 @@
                     $sqlCate = $pdo->prepare('SELECT libelle FROM categorie WHERE id_categorie=?');
                     $sqlCate->execute([$produit['id_categorie']]);
                     $categorie = $sqlCate->fetchColumn();
+
+                    if($produit['img1'] == null){
+                        $produit['img1'] = 'aucune.png';
+                    }
+
                 ?>
                 <div class="product-card <?= $produit['stock'] == 0 ? 'out-of-stock' : '' ?>">
                     <a href="produit.php?id=<?=$produit['id_produit']?>&id_voiture=<?=$produit['voiture']?>" class="product-link">
